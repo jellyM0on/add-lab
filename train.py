@@ -118,7 +118,7 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    output_dir = Path("norm-padding-outputs") if args.norm_padding else Path(".")
+    output_dir = Path("norm-padding-outputs") if args.norm_padding else Path("outputs")
     output_dir.mkdir(parents=True, exist_ok=True)
 
     model_path = output_dir / Path(args.model_path).name

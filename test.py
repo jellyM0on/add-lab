@@ -123,7 +123,7 @@ def main() -> None:
         parser.print_help()
         return
 
-    base_dir = Path("norm-padding-outputs") if args.norm_padding else Path(".")
+    base_dir = Path("norm-padding-outputs") if args.norm_padding else Path("outputs")
     model_path = base_dir / Path(args.model_path).name
     history_path = base_dir / Path(args.history_path).name
 
