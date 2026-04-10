@@ -2,11 +2,13 @@
 Usage:
     python train.py
     python train.py --hidden_size 256 --epochs 150 --train_size 8000 --val_size 1000 --test_size 1000
+    python train.py --norm_padding
 """
 
 import argparse
 import random
 import numpy as np
+from pathlib import Path
 
 from src.model import Seq2SeqRNN
 from src.dataset import build_full_dataset, split_dataset, prepare_pair
@@ -26,8 +28,9 @@ def train_model(
     test_size: int = 1000,
     patience: int = 12,
     lr: float = 0.01,
+    norm_padding: bool = False,
 ) -> tuple[Seq2SeqRNN, list[tuple[str, str]], list[tuple[str, str]], dict]:
-    full_data = build_full_dataset(99)
+    full_data = build_full_dataset(99, norm_padding=norm_padding)
     train_data, val_data, test_data = split_dataset(
         full_data,
         train_size=train_size,
@@ -85,9 +88,11 @@ def train_model(
         "val_exact": acc_history,
         "best_val_exact": best_acc,
         "test_exact": test_acc,
+        "norm_padding": norm_padding,
     }
 
     return model, val_data, test_data, history
+
 
 # ============================================================
 # CLI
@@ -104,9 +109,24 @@ def main() -> None:
     parser.add_argument("--lr",           type=float, default=0.01)
     parser.add_argument("--model_path",   type=str,   default="secret_accountant_model.npz")
     parser.add_argument("--history_path", type=str,   default="training_history.npz")
-    parser.add_argument("--hidden_input", type=str,   default="15+8",
+    parser.add_argument("--hidden_input", type=str,   default=None,
                         help="Input string used for the hidden-state heatmap.")
+    parser.add_argument(
+        "--norm_padding",
+        action="store_true",
+        help="Force all inputs to use zero-padded format like 00+00 and save outputs under norm-padding-outputs/.",
+    )
     args = parser.parse_args()
+
+    output_dir = Path("norm-padding-outputs") if args.norm_padding else Path(".")
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    model_path = output_dir / Path(args.model_path).name
+    history_path = output_dir / Path(args.history_path).name
+
+    hidden_input = args.hidden_input
+    if hidden_input is None:
+        hidden_input = "15+08" if args.norm_padding else "15+8"
 
     model, val_data, test_data, history = train_model(
         hidden_size=args.hidden_size,
@@ -116,10 +136,14 @@ def main() -> None:
         test_size=args.test_size,
         patience=args.patience,
         lr=args.lr,
+        norm_padding=args.norm_padding,
     )
 
-    save_model(model, args.model_path)
-    save_history(history, args.history_path)
+    save_model(model, str(model_path))
+    save_history(history, str(history_path))
+
+    print(f"\nSaved model to: {model_path}")
+    print(f"Saved history to: {history_path}")
 
     print("\nValidation examples:")
     show_examples(model, val_data, n=12)
@@ -127,8 +151,12 @@ def main() -> None:
     print("\nTest examples:")
     show_examples(model, test_data, n=12)
 
-    plot_loss(history)
-    plot_hidden_state_heatmap(model, args.hidden_input)
+    plot_loss(history, filename=str(output_dir / "loss_vs_iteration.png"))
+    plot_hidden_state_heatmap(
+        model,
+        hidden_input,
+        filename=str(output_dir / "hidden_state_heatmap.png"),
+    )
 
 if __name__ == "__main__":
     main()

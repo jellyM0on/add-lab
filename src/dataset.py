@@ -1,11 +1,17 @@
 import random
 from src.vocab import encode_string, stoi, EOS
 
-def build_full_dataset(max_num: int = 99) -> list[tuple[str, str]]:
+def format_input(a: int, b: int, norm_padding: bool = False) -> str:
+    return f"{a:02d}+{b:02d}" if norm_padding else f"{a}+{b}"
+
+def build_full_dataset(
+    max_num: int = 99,
+    norm_padding: bool = False,
+) -> list[tuple[str, str]]:
     data = []
     for a in range(max_num + 1):
         for b in range(max_num + 1):
-            inp = f"{a}+{b}"
+            inp = format_input(a, b, norm_padding=norm_padding)
             tgt = str(a + b)
             data.append((inp, tgt))
     return data
