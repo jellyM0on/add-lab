@@ -20,20 +20,35 @@ def plot_loss(history: dict, filename: str = "loss_vs_iteration.png") -> None:
 
 def plot_hidden_state_heatmap(
     model: Seq2SeqRNN,
-    input_str: str = "15+8",
+    input_str: str = "15+08",
     filename: str = "hidden_state_heatmap.png",
 ) -> None:
+    token_labels = list(input_str)
+
     input_indices = encode_string(input_str)
     _, enc_hs = model.encoder_forward(input_indices)
 
-    H = np.hstack(enc_hs[1:]).T
+    H = np.hstack(enc_hs[1:])
+    n_steps = H.shape[1]
 
-    plt.figure(figsize=(10, 5))
-    plt.imshow(H, aspect="auto", interpolation="nearest")
-    plt.colorbar()
-    plt.xlabel("Hidden Unit")
-    plt.ylabel("Time Step")
+    fig_width = max(6, n_steps * 0.9)
+    plt.figure(figsize=(fig_width, 5))
+
+    im = plt.imshow(H, aspect="auto", cmap="RdBu", vmin=-1, vmax=1)
+    plt.colorbar(im, label="Tanh activation")
+
+    plt.xlabel("Time Step (input token)")
+    plt.ylabel("Hidden Unit Index")
     plt.title(f"Encoder Hidden State Heatmap — input: '{input_str}'")
+
+    if len(token_labels) == n_steps:
+        plt.xticks(range(n_steps), token_labels, fontsize=11)
+    else:
+        print(
+            f"Warning: token_labels length ({len(token_labels)}) "
+            f"does not match number of steps ({n_steps}). Labels skipped."
+        )
+
     plt.tight_layout()
     plt.savefig(filename, dpi=200)
     plt.show()
