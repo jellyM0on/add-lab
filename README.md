@@ -362,5 +362,5 @@ In terms of convergence,
 - The further right we go, the more high-contrast the patterns become
 
 **4. What does the result suggest about the strengths and limits of Encoder-Decoder RNNs?**
-- Results show they are effective even in mapping variable-length sequences, allowing them to learn patterns and stopping conditions. Their limitation is how they rely on statistical frequency instead of actual logical reasoning hence the wrong examples we encountered
+- Results show they are effective even in mapping variable-length sequences, allowing them to learn patterns and stopping conditions. Their limitation is how they rely on statistical frequency instead of actual logical reasoning hence the one-off mistakes we encountered
 
