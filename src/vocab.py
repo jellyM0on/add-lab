@@ -4,11 +4,10 @@ import numpy as np
 # Vocabulary
 # ============================================================
 
-PAD = "_"
 SOS = "<SOS>"
 EOS = "<EOS>"
 
-VOCAB = list("0123456789+") + [PAD, SOS, EOS]
+VOCAB = list("0123456789+") + [SOS, EOS]
 stoi = {ch: i for i, ch in enumerate(VOCAB)}
 itos = {i: ch for ch, i in stoi.items()}
 VOCAB_SIZE = len(VOCAB)
@@ -21,7 +20,7 @@ def encode_string(s: str) -> list[int]:
     return [stoi[ch] for ch in s]
 
 def decode_indices(indices: list[int]) -> str:
-    return "".join(itos[i] for i in indices if itos[i] not in (PAD, SOS, EOS))
+    return "".join(itos[i] for i in indices if itos[i] not in (SOS, EOS))
 
 # ============================================================
 # Math helpers
